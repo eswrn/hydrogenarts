@@ -19,12 +19,23 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 from image_generator.views import generate_image
 
 
+
+def root_redirect(request):
+    if request.user.is_authenticated:
+        return redirect('generate')
+    else:
+        return redirect('login')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', generate_image, name='generate'),
+    path('', root_redirect, name='root_redirect'),
+    path('generate/', login_required(generate_image), name='generate'),
     path('image_generator/', include('image_generator.urls')),
     path('hydrogen_arts/', include('hydrogen_arts.urls')),
     path('user/', include('User.urls')),

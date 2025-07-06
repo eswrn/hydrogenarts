@@ -43,11 +43,18 @@ def generate_image(request):
         user_images = ImageRequest.objects.filter(user=request.user, process='done').exclude(image_path__isnull=True).exclude(image_path='').order_by('-created_at')
         media_root = os.path.abspath(settings.MEDIA_ROOT)
         for img in user_images:
-            # If image_path is absolute, strip MEDIA_ROOT
             image_path = img.image_path
+            # If image_path is absolute, strip everything before 'media' so it starts with 'media/'
             if image_path and os.path.isabs(image_path):
-                if image_path.startswith(media_root):
-                    image_path = image_path[len(media_root):].lstrip(os.sep)
+                idx = image_path.find('media' + os.sep)
+                if idx != -1:
+                    image_path = image_path[idx:]
+            # If image_path is just a filename or starts with 'generated_images/', ensure it starts with 'media/'
+            if image_path:
+                if not image_path.startswith('/') and not image_path.startswith('media/'):
+                    image_path = f'media/{image_path}'
+                elif image_path.startswith('generated_images/'):
+                    image_path = f'media/{image_path}'
             user_generated_images.append({
                 'url': image_path,
                 'created_at': img.created_at
