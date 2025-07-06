@@ -68,7 +68,7 @@
 
 <style>
 @media (max-width: 991.98px) {
-    /* Stack all panes vertically in mobile, in DOM order */
+    /* Stack all panes vertically in mobile, in DOM order and reduce their heights */
     .main-panes-row {
         flex-direction: column !important;
         height: auto !important;
@@ -94,10 +94,13 @@
         max-width: 100% !important;
         width: 100% !important;
         margin-bottom: 1.2rem !important;
+        height: 260px !important;
+        min-height: 180px !important;
+        max-height: 320px !important;
+        padding: 1.1rem 0.7rem 1.1rem 0.7rem !important;
     }
     .gallery-card, .result-pane, .prompt-card {
         box-shadow: 0 4px 16px 0 rgba(163, 227, 255, 0.10), 0 1.5px 8px 0 rgba(224, 179, 255, 0.08);
-        padding: 1.1rem 0.7rem 1.1rem 0.7rem !important;
     }
     .gallery-card .image-pane {
         flex-direction: column !important;
