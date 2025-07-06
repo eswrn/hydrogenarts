@@ -500,18 +500,16 @@ document.addEventListener('DOMContentLoaded', function() {
             refreshGallery();
         }
         function refreshGallery() {
-            // Try mobile gallery first, fallback to desktop
-            let galleryPane = document.querySelector('.mobile-gallery-card .image-pane');
-            if (!galleryPane) {
-                galleryPane = document.querySelector('#gallery-pane .image-pane');
-            }
-            if (!galleryPane) return;
+            // Update both mobile and desktop gallery panes if present
+            const mobileGalleryPane = document.querySelector('.mobile-gallery-card .image-pane');
+            const desktopGalleryPane = document.querySelector('#gallery-pane .image-pane');
             fetch(window.location.pathname + '?gallery=1', {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.text())
             .then(html => {
-                galleryPane.innerHTML = html;
+                if (mobileGalleryPane) mobileGalleryPane.innerHTML = html;
+                if (desktopGalleryPane) desktopGalleryPane.innerHTML = html;
                 attachGalleryThumbHandlers();
             });
         }
