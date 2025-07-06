@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 {% load static %}
 
@@ -60,13 +59,16 @@
                 <div class="user-gallery-container flex-fill align-self-stretch w-100 d-flex flex-column justify-content-center" style="height: 100%; min-height: 0; max-height: none; overflow: hidden;">
                     <div class="image-pane" style="flex-wrap: wrap; gap: 18px; justify-content: flex-start; align-items: flex-start; height: 100%; min-height: 0; max-height: 100%; overflow-y: auto;">
                         {% for img in user_generated_images %}
-                            <div class="d-flex flex-column align-items-center mb-2" style="width: 250px;">
-                        <img src="/{{ img.url }}" class="generated-thumb gallery-thumb" alt="Generated Image" data-img="/{{ img.url }}">
-                                <span class="text-muted" style="font-size: 0.92rem; margin-top: 0.3em;">{{ img.created_at|date:"M d, Y H:i" }}</span>
-                            </div>
-                        {% empty %}
-                            <div class="text-center text-muted">No images generated yet.</div>
-                        {% endfor %}
+    <div class="d-flex flex-row align-items-start mb-2" style="width: 100%; max-width: 340px; gap: 10px;">
+        <img src="/{{ img.url }}" class="generated-thumb gallery-thumb" alt="Generated Image" data-img="/{{ img.url }}" data-prompt="{{ img.prompt|escapejs }}">
+        <div class="d-flex flex-column justify-content-between" style="flex:1; min-width:0;">
+            <span class="text-muted" style="font-size: 0.92rem; margin-top: 0.3em;">{{ img.created_at|date:"M d, Y H:i" }}</span>
+            <span class="gallery-prompt-label" style="font-size: 0.98rem; color: #a3e3ff; word-break:break-word; margin-top: 0.5em;">{{ img.prompt }}</span>
+        </div>
+    </div>
+{% empty %}
+    <div class="text-center text-muted">No images generated yet.</div>
+{% endfor %}
                     </div>
                 </div>
             </div>
@@ -351,6 +353,7 @@
     <div id="popup-content">
         <button id="popup-close">&times;</button>
         <img id="popup-img" src="" alt="Full Size Image">
+        <div id="popup-prompt-label" style="margin-top:1.2em; color:#a3e3ff; font-size:1.08rem; text-align:center; word-break:break-word;"></div>
     </div>
 </div>
 
@@ -377,6 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (thumb) {
             thumb.addEventListener('click', function() {
                 document.getElementById('popup-img').src = imgPath;
+                document.getElementById('popup-prompt-label').textContent = '';
                 document.getElementById('image-popup').classList.add('active');
             });
         }
@@ -391,22 +395,22 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(window.location.pathname + '?gallery=1', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.gallery_html) {
-                galleryPane.innerHTML = data.gallery_html;
-                // Re-attach click events for new images
-                galleryPane.querySelectorAll('.gallery-thumb').forEach(function(img) {
-                    img.addEventListener('click', function() {
-                        let imgPath = img.getAttribute('data-img');
-                        if (imgPath && !imgPath.startsWith('/media/')) {
-                            imgPath = '/media/' + imgPath.replace(/^\/+/,'');
-                        }
-                        document.getElementById('popup-img').src = imgPath;
-                        document.getElementById('image-popup').classList.add('active');
-                    });
+        .then(response => response.text())
+        .then(html => {
+            galleryPane.innerHTML = html;
+            // Re-attach click events for new images
+            galleryPane.querySelectorAll('.gallery-thumb').forEach(function(img) {
+                img.addEventListener('click', function() {
+                    let imgPath = img.getAttribute('data-img');
+                    let promptText = img.getAttribute('data-prompt') || '';
+                    if (imgPath && !imgPath.startsWith('/media/')) {
+                        imgPath = '/media/' + imgPath.replace(/^\/+/,'');
+                    }
+                    document.getElementById('popup-img').src = imgPath;
+                    document.getElementById('popup-prompt-label').textContent = promptText;
+                    document.getElementById('image-popup').classList.add('active');
                 });
-            }
+            });
         });
     }
     function showError(msg) {
@@ -491,10 +495,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.gallery-thumb').forEach(function(img) {
         img.addEventListener('click', function() {
             let imgPath = img.getAttribute('data-img');
+            let promptText = img.getAttribute('data-prompt') || '';
             if (imgPath && !imgPath.startsWith('/media/')) {
                 imgPath = '/media/' + imgPath.replace(/^\/+/,'');
             }
             document.getElementById('popup-img').src = imgPath;
+            document.getElementById('popup-prompt-label').textContent = promptText;
             document.getElementById('image-popup').classList.add('active');
         });
     });
