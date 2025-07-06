@@ -1,0 +1,11 @@
+{% for img in user_generated_images %}
+    <div class="d-flex flex-row align-items-start mb-2" style="width: 100%; max-width: 340px; gap: 10px;">
+        <img src="/{{ img.url }}" class="generated-thumb gallery-thumb" alt="Generated Image" data-img="/{{ img.url }}" data-prompt="{{ img.prompt|escapejs }}">
+        <div class="d-flex flex-column justify-content-between" style="flex:1; min-width:0;">
+            <span class="text-muted" style="font-size: 0.92rem; margin-top: 0.3em;">{{ img.created_at|date:"M d, Y H:i" }}</span>
+            <span class="gallery-prompt-label" style="font-size: 0.98rem; color: #a3e3ff; word-break:break-word; margin-top: 0.5em;">{{ img.prompt }}</span>
+        </div>
+    </div>
+{% empty %}
+    <div class="text-center text-muted">No images generated yet.</div>
+{% endfor %}
