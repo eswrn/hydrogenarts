@@ -27,6 +27,11 @@
                 {% if error %}
                     <div class="alert alert-danger mt-4">{{ error }}</div>
                 {% endif %}
+                {% if user.is_authenticated %}
+                    <div class="mt-4">
+                        <a href="{% url 'logout' %}" class="btn btn-outline-light btn-sm">Logout</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
         <!-- Result Pane at Right End -->
