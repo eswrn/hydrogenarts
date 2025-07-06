@@ -19,8 +19,8 @@
     </div>
     <!-- Main Panes Row -->
     <div class="row flex-nowrap justify-content-center align-items-stretch flex-grow-1 main-panes-row" style="height: calc(70vh - 70px); min-height: 0; max-height: calc(70vh - 70px); overflow-x: auto; overflow-y: hidden; flex: 1 1 auto;">
-        <!-- Prompt Pane Centered with Further Rightward Offset -->
-        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center mb-0 p-0 h-100 pane-col" id="prompt-pane" style="height: 100%; min-height: 0; max-height: 100%;">
+        <!-- Prompt Pane: Always comes first in DOM for mobile stacking order -->
+        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center mb-0 p-0 h-100 pane-col" id="prompt-pane" style="height: 100%; min-height: 0; max-height: 100%; order: 1;">
             <div class="prompt-card flex-fill d-flex flex-column justify-content-center align-items-center w-100 h-100" style="min-width: 420px; max-width: 600px; height: 100%; min-height: 0;">
                 <form id="prompt-form" method="post" class="w-100" style="max-width: 480px;">
                     {% csrf_token %}
@@ -42,8 +42,8 @@
                 {% endif %}
             </div>
         </div>
-        <!-- Result Pane at Right End -->
-        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center p-0 h-100 pane-col" id="result-pane" style="height: 100%; min-height: 0; max-height: 100%;">
+        <!-- Result Pane -->
+        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center p-0 h-100 pane-col" id="result-pane" style="height: 100%; min-height: 0; max-height: 100%; order: 2;">
             <div class="result-pane flex-fill d-flex flex-column align-items-center justify-content-center position-relative w-100 h-100" style="min-width: 340px; max-width: 480px; height: 100%; min-height: 0;">
                 <div class="result-header w-100 d-flex align-items-center justify-content-between mb-3 px-3" style="min-height: 48px;"></div>
                 <div class="generated-image-container flex-fill align-self-stretch w-100 d-flex flex-column justify-content-center" id="result-container" style="min-height: 250px;">
@@ -53,8 +53,8 @@
             </div>
         </div>
         <!-- User Gallery Card -->
-        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center p-0 h-100 pane-col" id="gallery-pane" style="height: 100%; min-height: 0; max-height: 100%;">
-            <div class="gallery-card flex-fill d-flex flex-column align-items-center justify-content-center position-relative w-100 h-100" style="min-width: 420px; max-width: 620px; height: 100%; min-height: 0; background: rgba(255,255,255,0.13); border: 1.5px solid rgba(163,227,255,0.13); border-radius: 28px; box-shadow: 0 8px 40px 0 rgba(163, 227, 255, 0.10), 0 1.5px 8px 0 rgba(224, 179, 255, 0.08); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); padding: 1.5rem 1.2rem 1.2rem 1.2rem;">
+        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center p-0 h-100 pane-col" id="gallery-pane" style="height: 100%; min-height: 0; max-height: 100%; order: 3;">
+            <div class="gallery-card flex-fill d-flex flex-column align-items-center justify-content-center position-relative w-100 h-100" style="min-width: 340px; max-width: 480px; height: 100%; min-height: 0; background: rgba(255,255,255,0.13); border: 1.5px solid rgba(163,227,255,0.13); border-radius: 28px; box-shadow: 0 8px 40px 0 rgba(163, 227, 255, 0.10), 0 1.5px 8px 0 rgba(224, 179, 255, 0.08); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); padding: 1.5rem 1.2rem 1.2rem 1.2rem;">
                 <div class="w-100 d-flex align-items-center justify-content-between mb-3 px-3" style="min-height: 48px;"></div>
                 <div class="user-gallery-container flex-fill align-self-stretch w-100 d-flex flex-column justify-content-center" style="height: 100%; min-height: 0; max-height: none; overflow: hidden;">
                     <div class="image-pane" style="flex-wrap: wrap; gap: 18px; justify-content: flex-start; align-items: flex-start; height: 100%; min-height: 0; max-height: 100%; overflow-y: auto;">
@@ -67,6 +67,12 @@
 </div>
 
 <style>
+@media (max-width: 991.98px) {
+    /* Ensure prompt pane always comes first in mobile stacking */
+    #prompt-pane { order: 1 !important; }
+    #result-pane { order: 2 !important; }
+    #gallery-pane { order: 3 !important; }
+}
 /* Responsive panel height fix for all three panes */
 .main-panes-row {
     height: calc(100vh - 70px) !important;
