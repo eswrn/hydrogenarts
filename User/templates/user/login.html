@@ -9,6 +9,9 @@
         <h2 class="dialog-heading unified-title mb-4 text-center">Login</h2>
         <form method="post">
             {% csrf_token %}
+            {% if form.errors or error %}
+                <div class="alert alert-danger text-center mb-3">Invalid username or password. Please try again.</div>
+            {% endif %}
             <div class="mb-3">
                 <input type="text" name="username" class="form-control" placeholder="Username" required>
             </div>

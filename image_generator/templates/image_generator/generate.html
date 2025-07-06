@@ -380,6 +380,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('image-popup').classList.add('active');
             });
         }
+        // Refresh the gallery panel to show the latest image
+        refreshGallery();
+    }
+    // Function to refresh the gallery panel via AJAX
+    function refreshGallery() {
+        // Find the gallery image-pane
+        const galleryPane = document.querySelector('#gallery-pane .image-pane');
+        if (!galleryPane) return;
+        fetch(window.location.pathname + '?gallery=1', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.gallery_html) {
+                galleryPane.innerHTML = data.gallery_html;
+                // Re-attach click events for new images
+                galleryPane.querySelectorAll('.gallery-thumb').forEach(function(img) {
+                    img.addEventListener('click', function() {
+                        let imgPath = img.getAttribute('data-img');
+                        if (imgPath && !imgPath.startsWith('/media/')) {
+                            imgPath = '/media/' + imgPath.replace(/^\/+/,'');
+                        }
+                        document.getElementById('popup-img').src = imgPath;
+                        document.getElementById('image-popup').classList.add('active');
+                    });
+                });
+            }
+        });
     }
     function showError(msg) {
         resultTitle.textContent = 'Error';
