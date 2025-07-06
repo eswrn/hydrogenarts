@@ -456,6 +456,7 @@ function attachGalleryThumbHandlers() {
     document.querySelectorAll('.gallery-thumb, .generated-thumb').forEach(function(img) {
         img.removeEventListener('click', img._popupHandler || (()=>{}));
         img._popupHandler = function() {
+            console.log('Popup handler fired', img);
             let imgPath = img.getAttribute('data-img') || img.getAttribute('src');
             let promptText = img.getAttribute('data-prompt') || '';
             if (imgPath && !imgPath.startsWith('/media/')) {
@@ -466,8 +467,6 @@ function attachGalleryThumbHandlers() {
             document.getElementById('image-popup').classList.add('active');
         };
         img.addEventListener('click', img._popupHandler);
-        // Debug: log which images get handlers
-        // console.log('Attached popup handler to', img);
     });
 }
 
