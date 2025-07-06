@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Register - HydrogenArts{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 400px;">
+    <div class="prompt-card position-relative">
+        <h2 class="mb-4 text-center">Register</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+        </form>
+        <div class="mt-3 text-center">
+            <a href="{% url 'login' %}">Already have an account? Login</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
