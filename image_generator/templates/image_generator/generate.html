@@ -68,10 +68,47 @@
 
 <style>
 @media (max-width: 991.98px) {
-    /* Ensure prompt pane always comes first in mobile stacking */
-    #prompt-pane { order: 1 !important; }
-    #result-pane { order: 2 !important; }
-    #gallery-pane { order: 3 !important; }
+    /* Stack all panes vertically in mobile, in DOM order */
+    .main-panes-row {
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+    }
+    .pane-col {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin-bottom: 1.2rem !important;
+        order: unset !important;
+    }
+    .prompt-card, .result-pane, .gallery-card {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin-bottom: 1.2rem !important;
+    }
+    .gallery-card, .result-pane, .prompt-card {
+        box-shadow: 0 4px 16px 0 rgba(163, 227, 255, 0.10), 0 1.5px 8px 0 rgba(224, 179, 255, 0.08);
+        padding: 1.1rem 0.7rem 1.1rem 0.7rem !important;
+    }
+    .gallery-card .image-pane {
+        flex-direction: column !important;
+        gap: 12px !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+    .generated-thumb, .gallery-thumb {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-width: 0 !important;
+        border-radius: 12px !important;
+    }
 }
 /* Responsive panel height fix for all three panes */
 .main-panes-row {
