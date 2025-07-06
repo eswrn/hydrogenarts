@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Image Prompt - HydrogenArts (Mobile){% endblock %}
+
+{% block content %}
+<div class="container-fluid main-container" style="min-height: 100vh; max-width: 100vw; overflow-x: hidden; padding: 0;">
+    <!-- Unified Top Titles Row -->
+    <div class="row w-100 justify-content-center align-items-center mb-2" style="height: 56px;">
+        <div class="col-12 d-flex justify-content-center align-items-center">
+            <span class="dialog-heading unified-title" style="font-size: 1.3rem;">HydrogenArts</span>
+        </div>
+    </div>
+    <!-- Mobile Stacked Panes -->
+    <div class="mobile-panes-col d-flex flex-column align-items-stretch w-100" style="gap: 1.1rem;">
+        <!-- Prompt Pane -->
+        <div class="mobile-prompt-card" style="background: rgba(255,255,255,0.10); border-radius: 18px; box-shadow: 0 4px 16px 0 rgba(163, 227, 255, 0.10); padding: 1.1rem 0.7rem; width: 100vw; max-width: 100vw; min-width: 0;">
+            <form id="prompt-form" method="post" class="w-100" style="max-width: 100vw;">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <textarea class="form-control" id="prompt" name="prompt" rows="4" placeholder="Describe your image..." required style="font-size: 1rem;"></textarea>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary" style="font-size: 1rem; padding: 0.7rem 1.2rem;">Generate</button>
+                </div>
+            </form>
+            <div id="loading-indicator" class="mt-3 text-center" style="display:none;">
+                <img src="/media/motion-blur-2.svg" style="width:48px;height:48px;display:block;margin:0 auto 0.7rem auto;">
+                <div style="font-weight:700;font-size:1rem;color:#a3e3ff;letter-spacing:1px;">Generating...</div>
+            </div>
+            {% if error %}
+                <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+        </div>
+        <!-- Result Pane -->
+        <div class="mobile-result-card" style="background: rgba(255,255,255,0.13); border-radius: 18px; box-shadow: 0 4px 16px 0 rgba(163, 227, 255, 0.10); padding: 1.1rem 0.7rem; width: 100vw; max-width: 100vw; min-width: 0;">
+            <div class="generated-image-container d-flex flex-column align-items-center justify-content-center w-100" id="result-container" style="min-height: 120px;">
+                <div id="result-image-pane" class="image-pane" style="justify-content: center;"></div>
+                <h3 class="dialog-heading text-center mt-2" id="result-title" style="opacity:0.7; font-size:1rem;">Your Creation will appear here</h3>
+            </div>
+        </div>
+        <!-- Gallery Pane -->
+        <div class="mobile-gallery-card" style="background: rgba(255,255,255,0.13); border-radius: 18px; box-shadow: 0 4px 16px 0 rgba(163, 227, 255, 0.10); padding: 1.1rem 0.7rem; width: 100vw; max-width: 100vw; min-width: 0;">
+            <div class="user-gallery-container w-100 d-flex flex-column align-items-stretch" style="max-height: 220px; overflow-y: auto;">
+                <div class="image-pane" style="flex-direction: column; gap: 10px;">
+                    {% include "image_generator/_gallery_items.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media (min-width: 992px) {
+    .mobile-panes-col, .mobile-prompt-card, .mobile-result-card, .mobile-gallery-card {
+        display: none !important;
+    }
+}
+@media (max-width: 991.98px) {
+    .main-container, .main-panes-row, .pane-col, .prompt-card, .result-pane, .gallery-card {
+        display: none !important;
+    }
+    .mobile-panes-col {
+        display: flex !important;
+    }
+}
+</style>
+
+<div id="image-popup">
+    <div id="popup-content">
+        <button id="popup-close">&times;</button>
+        <img id="popup-img" src="" alt="Full Size Image">
+        <div id="popup-prompt-label" style="margin-top:1.2em; color:#a3e3ff; font-size:1.08rem; text-align:center; word-break:break-word;"></div>
+    </div>
+</div>
+
+<script>
+// Mobile JS logic (same as desktop, but selectors target mobile IDs/classes)
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('prompt-form');
+    const loading = document.getElementById('loading-indicator');
+    const resultContainer = document.getElementById('result-container');
+    const resultTitle = document.getElementById('result-title');
+    const resultImagePane = document.getElementById('result-image-pane');
+    let pollIntervalId = null;
+    function showImage(imgPath) {
+        if (!imgPath.startsWith('/media/')) {
+            imgPath = '/media/' + imgPath.replace(/^\/+/,'');
+        }
+        resultTitle.textContent = 'Your Creation';
+        resultContainer.style.opacity = 1;
+        resultImagePane.innerHTML = `<img src="${imgPath}" class="generated-thumb" alt="Generated Image" style="width: 100%; max-width: 320px; height: auto; border-radius: 12px;">`;
+        const thumb = resultImagePane.querySelector('.generated-thumb');
+        if (thumb) {
+            thumb.addEventListener('click', function() {
+                document.getElementById('popup-img').src = imgPath;
+                document.getElementById('popup-prompt-label').textContent = '';
+                document.getElementById('image-popup').classList.add('active');
+            });
+        }
+        refreshGallery();
+    }
+    function refreshGallery() {
+        const galleryPane = document.querySelector('.mobile-gallery-card .image-pane');
+        if (!galleryPane) return;
+        fetch(window.location.pathname + '?gallery=1', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            galleryPane.innerHTML = html;
+            galleryPane.querySelectorAll('.gallery-thumb').forEach(function(img) {
+                img.addEventListener('click', function() {
+                    let imgPath = img.getAttribute('data-img');
+                    let promptText = img.getAttribute('data-prompt') || '';
+                    if (imgPath && !imgPath.startsWith('/media/')) {
+                        imgPath = '/media/' + imgPath.replace(/^\/+/,'');
+                    }
+                    document.getElementById('popup-img').src = imgPath;
+                    document.getElementById('popup-prompt-label').textContent = promptText;
+                    document.getElementById('image-popup').classList.add('active');
+                });
+            });
+        });
+    }
+    function showError(msg) {
+        resultTitle.textContent = 'Error';
+        resultImagePane.innerHTML = `<div class='alert alert-danger mt-3'>${msg}</div>`;
+    }
+    function showWaiting() {
+        resultTitle.textContent = 'Your Creation will appear here';
+        resultImagePane.innerHTML = '';
+        resultContainer.style.opacity = 0.5;
+    }
+    function pollStatus(requestId) {
+        loading.style.display = 'block';
+        resultContainer.style.opacity = 0.5;
+        pollIntervalId = setInterval(() => {
+            fetch(`?request_id=${requestId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'done' && data.image_path) {
+                        clearInterval(pollIntervalId);
+                        loading.style.display = 'none';
+                        let imgPath = data.image_path.replace(/^\/+/,'');
+                        showImage(imgPath);
+                    } else if (data.status === 'failed' || data.status === 'error') {
+                        clearInterval(pollIntervalId);
+                        loading.style.display = 'none';
+                        showError('Image generation failed. Please try again.');
+                    } else {
+                        loading.style.display = 'block';
+                        showWaiting();
+                    }
+                })
+                .catch(() => {
+                    clearInterval(pollIntervalId);
+                    loading.style.display = 'none';
+                    showError('An error occurred. Please try again.');
+                });
+        }, 1000);
+    }
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            loading.style.display = 'block';
+            showWaiting();
+            const formData = new FormData(form);
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(function(data) {
+                if (data.request_id) {
+                    pollStatus(data.request_id);
+                } else if (data.error) {
+                    loading.style.display = 'none';
+                    showError(data.error);
+                }
+            })
+            .catch(function() {
+                loading.style.display = 'none';
+                showError('An error occurred. Please try again.');
+            });
+        });
+    }
+    document.getElementById('popup-close').addEventListener('click', function() {
+        document.getElementById('image-popup').classList.remove('active');
+        document.getElementById('popup-img').src = '';
+    });
+    document.getElementById('image-popup').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+            document.getElementById('popup-img').src = '';
+        }
+    });
+    document.querySelectorAll('.gallery-thumb').forEach(function(img) {
+        img.addEventListener('click', function() {
+            let imgPath = img.getAttribute('data-img');
+            let promptText = img.getAttribute('data-prompt') || '';
+            if (imgPath && !imgPath.startsWith('/media/')) {
+                imgPath = '/media/' + imgPath.replace(/^\/+/,'');
+            }
+            document.getElementById('popup-img').src = imgPath;
+            document.getElementById('popup-prompt-label').textContent = promptText;
+            document.getElementById('image-popup').classList.add('active');
+        });
+    });
+});
+</script>
+{% endblock %}
