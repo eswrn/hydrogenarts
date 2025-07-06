@@ -43,6 +43,26 @@
                 </div>
             </div>
         </div>
+        <!-- User Gallery Card -->
+        <div class="col-12 col-lg-4 d-flex justify-content-center order-lg-3 mt-4" id="gallery-pane">
+            <div class="gallery-card flex-fill d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 320px; min-width: 340px; max-width: 480px; background: rgba(255,255,255,0.13); border: 1.5px solid rgba(163,227,255,0.13); border-radius: 28px; box-shadow: 0 8px 40px 0 rgba(163, 227, 255, 0.10), 0 1.5px 8px 0 rgba(224, 179, 255, 0.08); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); padding: 1.5rem 1.2rem 1.2rem 1.2rem;">
+                <div class="w-100 d-flex align-items-center justify-content-between mb-3 px-3" style="min-height: 48px;">
+                    <h3 class="dialog-heading mb-0">Your Gallery</h3>
+                </div>
+                <div class="user-gallery-container flex-fill align-self-stretch w-100 d-flex flex-column justify-content-center" style="min-height: 250px; max-height: 320px; overflow-y: auto;">
+                    <div class="image-pane" style="flex-wrap: wrap; gap: 18px; justify-content: flex-start; align-items: flex-start;">
+                        {% for img in user_generated_images %}
+                            <div class="d-flex flex-column align-items-center mb-2" style="width: 250px;">
+                                <img src="{{ img.url }}" class="generated-thumb" alt="Generated Image">
+                                <span class="text-muted" style="font-size: 0.92rem; margin-top: 0.3em;">{{ img.created_at|date:"M d, Y H:i" }}</span>
+                            </div>
+                        {% empty %}
+                            <div class="text-center text-muted">No images generated yet.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
