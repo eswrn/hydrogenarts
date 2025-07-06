@@ -1,9 +1,9 @@
 {% for img in user_generated_images %}
     <div class="d-flex flex-row align-items-start mb-2" style="width: 100%; max-width: 340px; gap: 10px;">
         <img src="/{{ img.url }}" class="generated-thumb gallery-thumb" alt="Generated Image" data-img="/{{ img.url }}" data-prompt="{{ img.prompt|escapejs }}">
-        <div class="d-flex flex-column justify-content-between" style="flex:1; min-width:0;">
-            <span class="text-muted" style="font-size: 0.92rem; margin-top: 0.3em;">{{ img.created_at|date:"M d, Y H:i" }}</span>
-            <span class="gallery-prompt-label" style="font-size: 0.98rem; color: #a3e3ff; word-break:break-word; margin-top: 0.5em;">{{ img.prompt }}</span>
+        <div class="gallery-meta-card d-flex flex-column justify-content-start align-items-stretch p-2" style="background:rgba(36,40,60,0.13); border-radius:12px; min-width:0; flex:1; box-shadow:0 2px 8px rgba(163,227,255,0.08); border:1px solid rgba(163,227,255,0.10);">
+            <span class="gallery-prompt-label" style="font-size:1.01rem; color:#a3e3ff; word-break:break-word; font-weight:600; margin-bottom:0.5em;">{{ img.prompt }}</span>
+            <span class="text-muted" style="font-size:0.92rem;">{{ img.created_at|date:"M d, Y H:i" }}</span>
         </div>
     </div>
 {% empty %}
