@@ -550,13 +550,22 @@ document.addEventListener('DOMContentLoaded', function() {
             // Always prevent default and stop propagation to block native form submission
             e.preventDefault();
             e.stopPropagation();
+            console.log('Prompt form submit handler called');
             loading.style.display = 'block';
             showWaiting();
             const formData = new FormData(form);
+            // Get CSRF token from form
+            let csrfToken = null;
+            for (let pair of formData.entries()) {
+                if (pair[0] === 'csrfmiddlewaretoken') {
+                    csrfToken = pair[1];
+                }
+            }
             fetch(window.location.pathname, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    ...(csrfToken ? {'X-CSRFToken': csrfToken} : {})
                 },
                 body: formData
             })
