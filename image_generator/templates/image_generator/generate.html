@@ -24,7 +24,7 @@
         <!-- Prompt Pane -->
         <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center mb-0 p-0 h-100 pane-col prompt-pane-col" id="prompt-pane" style="height: 100%; min-height: 0; max-height: 100%;">
             <div class="prompt-card flex-fill d-flex flex-column justify-content-center align-items-center w-100 h-100" style="min-width: 420px; max-width: 600px; height: 100%; min-height: 0;">
-                <form id="prompt-form" method="post" class="w-100" style="max-width: 480px;">
+<form id="prompt-form-desktop" method="post" class="w-100" style="max-width: 480px;">
                     {% csrf_token %}
                     <div class="mb-3">
                         <textarea class="form-control" id="prompt" name="prompt" rows="7" placeholder="e.g., A futuristic city skyline at sunset, with flying cars and neon lights, hyperrealistic, 8k" required></textarea>
@@ -454,94 +454,98 @@
 
 // Mobile AJAX form handling for prompt-form (works for both desktop and mobile)
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('prompt-form');
-    const loading = document.getElementById('loading-indicator');
-    const resultContainer = document.getElementById('result-container');
-    const resultTitle = document.getElementById('result-title');
-    const resultImagePane = document.getElementById('result-image-pane');
-    let pollIntervalId = null;
-    function showImage(imgPath) {
-        if (!imgPath.startsWith('/media/')) {
-            imgPath = '/media/' + imgPath.replace(/^\/+/,'');
-        }
-        resultTitle.textContent = 'Your Creation';
-        resultContainer.style.opacity = 1;
-        resultImagePane.innerHTML = `<img src="${imgPath}" class="generated-thumb" alt="Generated Image" style="width: 100%; max-width: 320px; height: auto; border-radius: 12px;">`;
-        const thumb = resultImagePane.querySelector('.generated-thumb');
-        if (thumb) {
-            thumb.addEventListener('click', function() {
-                document.getElementById('popup-img').src = imgPath;
-                document.getElementById('popup-prompt-label').textContent = '';
-                document.getElementById('image-popup').classList.add('active');
-            });
-        }
-        refreshGallery();
-    }
-    function refreshGallery() {
-        // Try mobile gallery first, fallback to desktop
-        let galleryPane = document.querySelector('.mobile-gallery-card .image-pane');
-        if (!galleryPane) {
-            galleryPane = document.querySelector('#gallery-pane .image-pane');
-        }
-        if (!galleryPane) return;
-        fetch(window.location.pathname + '?gallery=1', {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.text())
-        .then(html => {
-            galleryPane.innerHTML = html;
-            galleryPane.querySelectorAll('.gallery-thumb').forEach(function(img) {
-                img.addEventListener('click', function() {
-                    let imgPath = img.getAttribute('data-img');
-                    let promptText = img.getAttribute('data-prompt') || '';
-                    if (imgPath && !imgPath.startsWith('/media/')) {
-                        imgPath = '/media/' + imgPath.replace(/^\/+/,'');
-                    }
+    // Support both desktop and mobile forms
+    const forms = [
+        document.getElementById('prompt-form-desktop'),
+        document.getElementById('prompt-form-mobile')
+    ].filter(Boolean);
+    forms.forEach(function(form) {
+        const loading = form.parentElement.querySelector('#loading-indicator');
+        const resultContainer = form.parentElement.parentElement.querySelector('#result-container');
+        const resultTitle = form.parentElement.parentElement.querySelector('#result-title');
+        const resultImagePane = form.parentElement.parentElement.querySelector('#result-image-pane');
+        let pollIntervalId = null;
+        function showImage(imgPath) {
+            if (!imgPath.startsWith('/media/')) {
+                imgPath = '/media/' + imgPath.replace(/^\/+/,'');
+            }
+            resultTitle.textContent = 'Your Creation';
+            resultContainer.style.opacity = 1;
+            resultImagePane.innerHTML = `<img src="${imgPath}" class="generated-thumb" alt="Generated Image" style="width: 100%; max-width: 320px; height: auto; border-radius: 12px;">`;
+            const thumb = resultImagePane.querySelector('.generated-thumb');
+            if (thumb) {
+                thumb.addEventListener('click', function() {
                     document.getElementById('popup-img').src = imgPath;
-                    document.getElementById('popup-prompt-label').textContent = promptText;
+                    document.getElementById('popup-prompt-label').textContent = '';
                     document.getElementById('image-popup').classList.add('active');
                 });
-            });
-        });
-    }
-    function showError(msg) {
-        resultTitle.textContent = 'Error';
-        resultImagePane.innerHTML = `<div class='alert alert-danger mt-3'>${msg}</div>`;
-    }
-    function showWaiting() {
-        resultTitle.textContent = 'Your Creation will appear here';
-        resultImagePane.innerHTML = '';
-        resultContainer.style.opacity = 0.5;
-    }
-    function pollStatus(requestId) {
-        loading.style.display = 'block';
-        resultContainer.style.opacity = 0.5;
-        pollIntervalId = setInterval(() => {
-            fetch(`?request_id=${requestId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'done' && data.image_path) {
-                        clearInterval(pollIntervalId);
-                        loading.style.display = 'none';
-                        let imgPath = data.image_path.replace(/^\/+/,'');
-                        showImage(imgPath);
-                    } else if (data.status === 'failed' || data.status === 'error') {
-                        clearInterval(pollIntervalId);
-                        loading.style.display = 'none';
-                        showError('Image generation failed. Please try again.');
-                    } else {
-                        loading.style.display = 'block';
-                        showWaiting();
-                    }
-                })
-                .catch(() => {
-                    clearInterval(pollIntervalId);
-                    loading.style.display = 'none';
-                    showError('An error occurred. Please try again.');
+            }
+            refreshGallery();
+        }
+        function refreshGallery() {
+            // Try mobile gallery first, fallback to desktop
+            let galleryPane = document.querySelector('.mobile-gallery-card .image-pane');
+            if (!galleryPane) {
+                galleryPane = document.querySelector('#gallery-pane .image-pane');
+            }
+            if (!galleryPane) return;
+            fetch(window.location.pathname + '?gallery=1', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                galleryPane.innerHTML = html;
+                galleryPane.querySelectorAll('.gallery-thumb').forEach(function(img) {
+                    img.addEventListener('click', function() {
+                        let imgPath = img.getAttribute('data-img');
+                        let promptText = img.getAttribute('data-prompt') || '';
+                        if (imgPath && !imgPath.startsWith('/media/')) {
+                            imgPath = '/media/' + imgPath.replace(/^\/+/,'');
+                        }
+                        document.getElementById('popup-img').src = imgPath;
+                        document.getElementById('popup-prompt-label').textContent = promptText;
+                        document.getElementById('image-popup').classList.add('active');
+                    });
                 });
-        }, 1000);
-    }
-    if (form) {
+            });
+        }
+        function showError(msg) {
+            resultTitle.textContent = 'Error';
+            resultImagePane.innerHTML = `<div class='alert alert-danger mt-3'>${msg}</div>`;
+        }
+        function showWaiting() {
+            resultTitle.textContent = 'Your Creation will appear here';
+            resultImagePane.innerHTML = '';
+            resultContainer.style.opacity = 0.5;
+        }
+        function pollStatus(requestId) {
+            loading.style.display = 'block';
+            resultContainer.style.opacity = 0.5;
+            pollIntervalId = setInterval(() => {
+                fetch(`?request_id=${requestId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'done' && data.image_path) {
+                            clearInterval(pollIntervalId);
+                            loading.style.display = 'none';
+                            let imgPath = data.image_path.replace(/^\/+/,'');
+                            showImage(imgPath);
+                        } else if (data.status === 'failed' || data.status === 'error') {
+                            clearInterval(pollIntervalId);
+                            loading.style.display = 'none';
+                            showError('Image generation failed. Please try again.');
+                        } else {
+                            loading.style.display = 'block';
+                            showWaiting();
+                        }
+                    })
+                    .catch(() => {
+                        clearInterval(pollIntervalId);
+                        loading.style.display = 'none';
+                        showError('An error occurred. Please try again.');
+                    });
+            }, 1000);
+        }
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             loading.style.display = 'block';
@@ -568,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showError('An error occurred. Please try again.');
             });
         });
-    }
+    });
     document.getElementById('popup-close').addEventListener('click', function() {
         document.getElementById('image-popup').classList.remove('active');
         document.getElementById('popup-img').src = '';
