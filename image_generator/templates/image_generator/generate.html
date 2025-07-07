@@ -293,17 +293,18 @@
     transform: scale(1.04);
 }
 #image-popup {
-    display: none;
+#image-popup {
+    display: none !important;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(30,34,54,0.55);
     backdrop-filter: blur(8px) saturate(180%);
-    z-index: 9999;
+    z-index: 2147483647 !important;
     align-items: center;
     justify-content: center;
 }
 #image-popup.active {
-    display: flex;
+    display: flex !important;
 }
 #popup-content {
     background: rgba(255,255,255,0.10);
