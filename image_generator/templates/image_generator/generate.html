@@ -515,13 +515,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         function showError(msg) {
-            resultTitle.textContent = 'Error';
-            resultImagePane.innerHTML = `<div class='alert alert-danger mt-3'>${msg}</div>`;
+            if (resultTitle) resultTitle.textContent = 'Error';
+            if (resultImagePane) resultImagePane.innerHTML = `<div class='alert alert-danger mt-3'>${msg}</div>`;
         }
         function showWaiting() {
-            resultTitle.textContent = 'Your Creation will appear here';
-            resultImagePane.innerHTML = '';
-            resultContainer.style.opacity = 0.5;
+            if (resultTitle) resultTitle.textContent = 'Your Creation will appear here';
+            if (resultImagePane) resultImagePane.innerHTML = '';
+            if (resultContainer) resultContainer.style.opacity = 0.5;
         }
         function pollStatus(requestId) {
             loading.style.display = 'block';
