@@ -571,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             e.stopPropagation();
             console.log('Prompt form submit handler called');
-            loading.style.display = 'block';
+            if (loading) loading.style.display = 'block';
             showWaiting();
             const formData = new FormData(form);
             // Get CSRF token from form
