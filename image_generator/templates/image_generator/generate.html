@@ -293,7 +293,7 @@
     transform: scale(1.04);
 }
 #image-popup {
-    display: none !important;
+    display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(30,34,54,0.55);
@@ -303,7 +303,7 @@
     justify-content: center;
 }
 #image-popup.active {
-    display: flex;
+    display: flex !important;
 }
 #popup-content {
     background: rgba(255,255,255,0.10);
@@ -462,7 +462,11 @@ function attachGalleryThumbHandlers() {
             if (imgPath && !imgPath.startsWith('/media/')) {
                 imgPath = '/media/' + imgPath.replace(/^\/+/,'');
             }
-            document.getElementById('popup-img').src = imgPath;
+            const popupImg = document.getElementById('popup-img');
+            popupImg.src = '';
+            // Force reflow to ensure src change is registered
+            void popupImg.offsetWidth;
+            popupImg.src = imgPath;
             document.getElementById('popup-prompt-label').textContent = promptText;
             document.getElementById('image-popup').classList.add('active');
         };
@@ -501,7 +505,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const thumb = resultImagePane.querySelector('.generated-thumb');
             if (thumb) {
                 thumb.addEventListener('click', function() {
-                    document.getElementById('popup-img').src = imgPath;
+                    const popupImg = document.getElementById('popup-img');
+                    popupImg.src = '';
+                    void popupImg.offsetWidth;
+                    popupImg.src = imgPath;
                     document.getElementById('popup-prompt-label').textContent = '';
                     document.getElementById('image-popup').classList.add('active');
                 });
