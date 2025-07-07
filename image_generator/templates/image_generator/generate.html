@@ -35,7 +35,7 @@
                         </button>
                     </div>
                 </form>
-                <div id="loading-indicator" class="mt-4 text-center" style="display:none;">
+                <div id="loading-indicator-desktop" class="mt-4 text-center" style="display:none;">
                     <img src="/media/motion-blur-2.svg" style="width:64px;height:64px;display:block;margin:0 auto 1rem auto;">
                     <div style="font-weight:700;font-size:1.2rem;color:#a3e3ff;letter-spacing:1px;">Your Image is Generating...</div>
                 </div>
@@ -48,9 +48,9 @@
         <div class="col-12 col-lg-4 d-flex flex-column justify-content-center align-items-center p-0 h-100 pane-col" id="result-pane" style="height: 100%; min-height: 0; max-height: 100%; order: 2;">
             <div class="result-pane flex-fill d-flex flex-column align-items-center justify-content-center position-relative w-100 h-100" style="min-width: 340px; max-width: 480px; height: 100%; min-height: 0;">
                 <div class="result-header w-100 d-flex align-items-center justify-content-between mb-3 px-3" style="min-height: 48px;"></div>
-                <div class="generated-image-container flex-fill align-self-stretch w-100 d-flex flex-column justify-content-center" id="result-container" style="min-height: 250px;">
-                    <div id="result-image-pane" class="image-pane"></div>
-                    <h3 class="dialog-heading text-center mt-3" id="result-title" style="opacity:0.7; font-size:1.1rem;">Your Creation will appear here</h3>
+                <div class="generated-image-container flex-fill align-self-stretch w-100 d-flex flex-column justify-content-center" id="result-container-desktop" style="min-height: 250px;">
+                    <div id="result-image-pane-desktop" class="image-pane"></div>
+                    <h3 class="dialog-heading text-center mt-3" id="result-title-desktop" style="opacity:0.7; font-size:1.1rem;">Your Creation will appear here</h3>
                 </div>
             </div>
         </div>
@@ -478,10 +478,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('prompt-form-mobile')
     ].filter(Boolean);
     forms.forEach(function(form) {
-        const loading = form.parentElement.querySelector('#loading-indicator');
-        const resultContainer = form.parentElement.parentElement.querySelector('#result-container');
-        const resultTitle = form.parentElement.parentElement.querySelector('#result-title');
-        const resultImagePane = form.parentElement.parentElement.querySelector('#result-image-pane');
+        let loading, resultContainer, resultTitle, resultImagePane;
+        if (form.id === 'prompt-form-desktop') {
+            loading = document.getElementById('loading-indicator-desktop');
+            resultContainer = document.getElementById('result-container-desktop');
+            resultTitle = document.getElementById('result-title-desktop');
+            resultImagePane = document.getElementById('result-image-pane-desktop');
+        } else if (form.id === 'prompt-form-mobile') {
+            loading = document.getElementById('loading-indicator-mobile');
+            resultContainer = document.getElementById('result-container-mobile');
+            resultTitle = document.getElementById('result-title-mobile');
+            resultImagePane = document.getElementById('result-image-pane-mobile');
+        }
         let pollIntervalId = null;
         function showImage(imgPath) {
             if (!imgPath.startsWith('/media/')) {
